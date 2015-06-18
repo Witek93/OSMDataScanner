@@ -33,25 +33,6 @@ public class OSMDataScanner {
     private static final String OPENSTREETMAP_API_06 = "http://www.openstreetmap.org/api/0.6/";
 
 
-    /**
-     * main method that simply reads some nodes
-     * 
-     * @param args
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     */
-    public static void main(String[] args) throws IOException, SAXException, ParserConfigurationException {
-            //Authenticator.setDefault(new BasicAuthenticator("youruser", "yourpassword"));
-            List<OSMNode> osmNodesInVicinity = getOSMNodesInVicinity(19.93, 50.06, 0.0001);
-            for (OSMNode osmNode : osmNodesInVicinity) {
-                if(osmNode.hasTags()) {
-                    System.out.println(osmNode);
-                }
-            }
-    }
-
-
     public static OSMNode getNode(String nodeId) throws IOException, ParserConfigurationException, SAXException {
             String string = "http://www.openstreetmap.org/api/0.6/node/" + nodeId;
             URL osm = new URL(string);
