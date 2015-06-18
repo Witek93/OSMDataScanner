@@ -19,7 +19,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-//import org.osm.lights.upload.BasicAuthenticator;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -48,25 +47,20 @@ public class OSMDataScanner {
             return null;
     }
 
-    /**
-     * 
-     * @param lon the longitude
-     * @param lat the latitude
-     * @param vicinityRange bounding box in this range
-     * @return the xml document containing the queries nodes
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     */
+    /* 
+       range value accuracy:
+       0.001  ~= 110m
+       0.0001 ~= 11m
+    */
     @SuppressWarnings("nls")
-    private static Document getXML(double lon, double lat, double vicinityRange) throws IOException, SAXException,
+    private static Document getXML(double lat, double lon, double range) throws IOException, SAXException,
                     ParserConfigurationException {
 
             DecimalFormat format = new DecimalFormat("##0.0000000", DecimalFormatSymbols.getInstance(Locale.ENGLISH)); //$NON-NLS-1$
-            String left = format.format(lat - vicinityRange);
-            String bottom = format.format(lon - vicinityRange);
-            String right = format.format(lat + vicinityRange);
-            String top = format.format(lon + vicinityRange);
+            String left = format.format(lon - range);
+            String bottom = format.format(lat - range);
+            String right = format.format(lon + range);
+            String top = format.format(lat + range);
 
             String string = OPENSTREETMAP_API_06 + "map?bbox=" + left + "," + bottom + "," + right + ","
                             + top;
@@ -91,7 +85,7 @@ public class OSMDataScanner {
      */
     @SuppressWarnings("nls")
     public static List<OSMNode> getNodes(Document xmlDocument) {
-        List<OSMNode> osmNodes = new ArrayList<OSMNode>();
+        List<OSMNode> osmNodes = new ArrayList<>();
 
         // Document xml = getXML(8.32, 49.001);
         Node osmRoot = xmlDocument.getFirstChild();
@@ -130,9 +124,20 @@ public class OSMDataScanner {
         return osmNodes;
     }
 
-    public static List<OSMNode> getOSMNodesInVicinity(double lat, double lon, double vicinityRange) throws IOException,
+    
+    /**
+     * 
+     * @param lat
+     * @param lon
+     * @param range 0.001  ~= 110m, 0.0001 ~= 11m
+     * @return
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException 
+     */
+    public static List<OSMNode> getOSMNodesInRange(double lat, double lon, double range) throws IOException,
             SAXException, ParserConfigurationException {
-        return OSMDataScanner.getNodes(getXML(lon, lat, vicinityRange));
+        return OSMDataScanner.getNodes(getXML(lat, lon, range));
     }
 
     /**

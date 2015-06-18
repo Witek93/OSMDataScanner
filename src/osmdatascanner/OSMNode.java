@@ -3,6 +3,7 @@ package osmdatascanner;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class OSMNode {
     private String id;
@@ -73,5 +74,9 @@ public class OSMNode {
     public void setVersion(String version) {
         this.version = version;
     }
-        
+
+    public String getTagValue(String key) {
+        return tags.get(key);
+    }
+      
 }
