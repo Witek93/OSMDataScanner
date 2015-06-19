@@ -45,13 +45,21 @@ public class ScannerExamples {
 
     private static void example_walk_Cracow(String tag) throws IOException, ParserConfigurationException, SAXException {
         double range = 0.001;
+        System.out.println("Bazylika Mariacka:");
         printTags(50.061719, 19.938798, range, tag); // Bazylika Mariacka
+        System.out.println("pomnik Mickiewicza:");
         printTags(50.061512, 19.937985, range, tag); // pomnik Mickiewicza
+        System.out.println("kościół Św. Wojciecha:");
         printTags(50.060808, 19.937849, range, tag); // kościół Św. Wojciecha
+        System.out.println("Plac Dominikański/Grodzka:");
         printTags(50.059099, 19.937892, range, tag); // Plac Dominikański/Grodzka
+        System.out.println("Plac Bernardyński:");
         printTags(50.054041, 19.938162, range, tag); // Plac Bernardyński
+        System.out.println("wejście na Wawel:");
         printTags(50.052780, 19.935271, range, tag); // wejście na Wawel
+        System.out.println("Wawel: przy zamku:");
         printTags(50.054351, 19.935469, range, tag); // Wawel: przy zamku
+        System.out.println("Wawel: plac zamkowy:");
         printTags(50.054488, 19.936639, range, tag); // Wawel: plac zamkowy
     }
 
