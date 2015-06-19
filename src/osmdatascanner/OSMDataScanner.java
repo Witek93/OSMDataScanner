@@ -18,6 +18,7 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.DOMException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -33,18 +34,19 @@ public class OSMDataScanner {
 
 
     public static OSMNode getNode(String nodeId) throws IOException, ParserConfigurationException, SAXException {
-            String string = "http://www.openstreetmap.org/api/0.6/node/" + nodeId;
-            URL osm = new URL(string);
-            HttpURLConnection connection = (HttpURLConnection) osm.openConnection();
+            URL osm = new URL("http://www.openstreetmap.org/api/0.6/node/" + nodeId);
+            HttpURLConnection connection = openNewURLConnection(osm);
 
-            DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
-            DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
-            Document document = docBuilder.parse(connection.getInputStream());
+            Document document = initDocumentBuilder().parse(connection.getInputStream());
             List<OSMNode> nodes = getNodes(document);
             if (!nodes.isEmpty()) {
                     return nodes.iterator().next();
             }
             return null;
+    }
+
+    private static HttpURLConnection openNewURLConnection(URL osm) throws IOException {
+        return (HttpURLConnection) osm.openConnection();       
     }
 
     /* 
@@ -65,17 +67,19 @@ public class OSMDataScanner {
             String string = OPENSTREETMAP_API_06 + "map?bbox=" + left + "," + bottom + "," + right + ","
                             + top;
             URL osm = new URL(string);
-            HttpURLConnection connection = (HttpURLConnection) osm.openConnection();
+            HttpURLConnection connection = openNewURLConnection(osm);
 
-            DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
-            DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
-            return docBuilder.parse(connection.getInputStream());
+            return initDocumentBuilder().parse(connection.getInputStream());
+    }
+
+    private static DocumentBuilder initDocumentBuilder() throws SAXException, IOException, ParserConfigurationException {
+        DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
+        return docBuilder;
     }
 
     public static Document getXMLFile(String location) throws ParserConfigurationException, SAXException, IOException {
-            DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
-            DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
-            return docBuilder.parse(location);
+        return initDocumentBuilder().parse(location);
     }
 
     /**
@@ -95,15 +99,9 @@ public class OSMDataScanner {
             if (item.getNodeName().equals("node")) {
                 NamedNodeMap attributes = item.getAttributes();
                 NodeList tagXMLNodes = item.getChildNodes();
-                Map<String, String> tags = new HashMap<>();
-                for (int j = 1; j < tagXMLNodes.getLength(); j++) {
-                    Node tagItem = tagXMLNodes.item(j);
-                    NamedNodeMap tagAttributes = tagItem.getAttributes();
-                    if (tagAttributes != null) {
-                            tags.put(tagAttributes.getNamedItem("k").getNodeValue(), tagAttributes.getNamedItem("v")
-                                    .getNodeValue());
-                    }
-                }
+                
+                Map<String, String> tags = getTags(tagXMLNodes);
+                
                 Node namedItemID = attributes.getNamedItem("id");
                 Node namedItemLat = attributes.getNamedItem("lat");
                 Node namedItemLon = attributes.getNamedItem("lon");
@@ -124,6 +122,18 @@ public class OSMDataScanner {
         return osmNodes;
     }
 
+    private static Map<String, String> getTags(NodeList tagXMLNodes) throws DOMException {
+        Map<String, String> tags = new HashMap<>();
+        for (int j = 1; j < tagXMLNodes.getLength(); j++) {
+            Node tagItem = tagXMLNodes.item(j);
+            NamedNodeMap tagAttributes = tagItem.getAttributes();
+            if (tagAttributes != null) {
+                tags.put(tagAttributes.getNamedItem("k").getNodeValue(), tagAttributes.getNamedItem("v")
+                        .getNodeValue());
+            }
+        }
+        return tags;
+    }
     
     /**
      * 
@@ -153,19 +163,12 @@ public class OSMDataScanner {
         String queryString = readFileAsString(query);
 
         URL osm = new URL(hostname);
-        HttpURLConnection connection = (HttpURLConnection) osm.openConnection();
+        HttpURLConnection connection = openNewURLConnection(osm);
         connection.setDoInput(true);
         connection.setDoOutput(true);
         connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 
-        DataOutputStream printout = new DataOutputStream(connection.getOutputStream());
-        printout.writeBytes("data=" + URLEncoder.encode(queryString, "utf-8"));
-        printout.flush();
-        printout.close();
-
-        DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
-        DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
-        return docBuilder.parse(connection.getInputStream());
+        return initDocumentBuilder().parse(connection.getInputStream());
     }
 
     /**
@@ -186,8 +189,5 @@ public class OSMDataScanner {
         }
         reader.close();
         return fileData.toString();
-    }
-
-
-	
+    }	
 }
